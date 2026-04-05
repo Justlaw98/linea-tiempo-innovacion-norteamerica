@@ -336,30 +336,5 @@ events.forEach(ev => {
 window.addEventListener('load', drawConnections);
 window.addEventListener('resize', drawConnections);
 </script>
-  <div style="text-align:center; margin-top:40px;">
-  <button onclick="toggleFuentes()" style="padding:10px 20px; font-size:16px; cursor:pointer; border-radius:8px; border:none; background-color:#007BFF; color:white;">
-    Ver fuentes completas
-  </button>
-</div>
-
-<div id="fuentes" style="display:none; margin-top:20px; padding:20px; background:#111; color:white;">
-  <h3>Fuentes (APA)</h3>
-  <ul>
-    <li>U.S. Department of Defense. (2020). Global Positioning System Overview.</li>
-    <li>National Coordination Office for Space-Based PNT. (2021). GPS.gov.</li>
-    <li>NASA. (2020). Global Positioning System History.</li>
-  </ul>
-</div>
-
-<script>
-function toggleFuentes() {
-  var x = document.getElementById("fuentes");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
-}
-</script>
 </body>
 </html>
