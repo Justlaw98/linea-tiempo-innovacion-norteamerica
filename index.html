@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Línea del tiempo comparativa — Innovación en América del Norte</title>
+<style>
+:root {
+  --bg:#0b1020; --panel:#101827; --panel2:#0f172a; --text:#e5e7eb; --muted:#94a3b8;
+  --us:#1F4E79; --ca:#C0392B; --mx:#1E8449; --tech:#D4AC0D; --pol:#7D3C98; --soc:#138D75;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; font-family: Inter, Segoe UI, Arial, sans-serif; background:linear-gradient(180deg,#08101f,#0f172a 55%, #111827);
+  color:var(--text); line-height:1.35;
+}
+header {
+  padding:26px 26px 12px; position:sticky; top:0; z-index:20; background:rgba(8,16,31,.92); backdrop-filter: blur(8px);
+  border-bottom:1px solid rgba(148,163,184,.2);
+}
+h1 { margin:0 0 6px; font-size:30px; }
+.subtitle { color:#cbd5e1; max-width:1100px; }
+.controls {
+  display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; align-items:center;
+}
+.group-label { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-right:2px; }
+button.filter {
+  border:1px solid rgba(255,255,255,.12); background:#111827; color:#e5e7eb; padding:8px 12px; border-radius:999px; cursor:pointer;
+  font-weight:600;
+}
+button.filter.active { outline:2px solid rgba(255,255,255,.18); }
+button.filter[data-value="Tecnológico-industrial"]{ background:rgba(212,172,13,.18); }
+button.filter[data-value="Político-económico"]{ background:rgba(125,60,152,.22); }
+button.filter[data-value="Socio-cultural"]{ background:rgba(19,141,117,.22); }
+.legend { display:flex; flex-wrap:wrap; gap:14px; margin-top:12px; font-size:13px; color:#cbd5e1; }
+.legend span { display:inline-flex; align-items:center; gap:8px; }
+.swatch { width:12px; height:12px; border-radius:4px; display:inline-block; }
+.wrapper { padding:18px 22px 40px; }
+.panel {
+  background:rgba(15,23,42,.82); border:1px solid rgba(148,163,184,.18); border-radius:20px; padding:16px 18px; margin-bottom:18px;
+  box-shadow:0 16px 40px rgba(0,0,0,.22);
+}
+.small-note { color:var(--muted); font-size:13px; }
+.timeline-shell { overflow-x:auto; padding-bottom:12px; }
+.timeline {
+  position:relative; min-width:1300px; height:3960px; background:
+   linear-gradient(180deg, rgba(255,255,255,.03) 0 1px, transparent 1px 100%);
+  background-size:100% 150px;
+  border-radius:24px; border:1px solid rgba(148,163,184,.18); overflow:hidden;
+}
+.scale {
+  position:absolute; inset:0 auto 0 0; width:82px; background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+  border-right:1px solid rgba(148,163,184,.16);
+}
+.scale .tick {
+  position:absolute; left:0; width:100%; padding-left:12px; font-size:12px; color:#94a3b8;
+}
+.lane {
+  position:absolute; top:0; bottom:0; width:calc((100% - 82px)/3); padding:0 14px;
+}
+.lane::before {
+  content:""; position:absolute; top:110px; bottom:20px; left:50%; width:4px; margin-left:-2px; background:rgba(148,163,184,.22); border-radius:999px;
+}
+.lane-header {
+  position:sticky; top:92px; z-index:10; margin:18px auto 0; width:max-content; padding:10px 16px; border-radius:999px; color:white; font-weight:800;
+  box-shadow:0 8px 18px rgba(0,0,0,.18);
+}
+#lane-ca { left:82px; }
+#lane-us { left:calc(82px + (100% - 82px)/3); }
+#lane-mx { left:calc(82px + 2*(100% - 82px)/3); }
+
+.event {
+  position:absolute; border-radius:18px; padding:14px 14px 14px 16px; background:rgba(15,23,42,.9);
+  border:1px solid rgba(255,255,255,.12); box-shadow:0 12px 28px rgba(0,0,0,.22); cursor:pointer; transition:.18s ease transform,.18s ease box-shadow,.18s ease opacity;
+}
+.event:hover { transform:translateY(-2px) scale(1.01); box-shadow:0 18px 34px rgba(0,0,0,.28); }
+.event.hidden { opacity:.12; pointer-events:none; }
+.event .dot {
+  position:absolute; top:18px; width:14px; height:14px; border-radius:50%; border:3px solid rgba(255,255,255,.8); background:currentColor;
+}
+.event.left .dot { right:-22px; }
+.event.right .dot { left:-22px; }
+.event.left { width:calc(50% - 24px); right:calc(50% + 16px); left:12px; }
+.event.right { width:calc(50% - 24px); left:calc(50% + 16px); right:auto; }
+.event.country-us { color:var(--us); }
+.event.country-ca { color:var(--ca); }
+.event.country-mx { color:var(--mx); }
+.event .eyebrow { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#cbd5e1; }
+.event h3 { margin:4px 0 8px; font-size:17px; color:white; line-height:1.2; }
+.event p { margin:0; font-size:13px; color:#dbe2ef; }
+.event .chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.chip {
+  display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:4px 10px; font-size:12px; font-weight:700; color:white;
+}
+.chip.cat-tech { background:var(--tech); color:#111827; }
+.chip.cat-pol { background:var(--pol); }
+.chip.cat-soc { background:var(--soc); }
+.chip.principal { background:#f59e0b; color:#111827; }
+.connector-layer { position:absolute; inset:0; pointer-events:none; }
+.connector-layer line {
+  stroke:rgba(148,163,184,.58); stroke-width:2.2; stroke-dasharray:6 6;
+}
+.connector-layer text {
+  fill:#cbd5e1; font-size:12px; font-weight:700;
+}
+.footer-sources {
+  columns:2; column-gap:28px; font-size:14px;
+}
+.footer-sources li { margin-bottom:10px; break-inside:avoid; color:#dbe2ef; }
+.src-country { font-weight:800; }
+.modal-backdrop {
+  position:fixed; inset:0; background:rgba(2,6,23,.72); display:none; align-items:center; justify-content:center; z-index:100;
+}
+.modal {
+  width:min(860px,92vw); max-height:88vh; overflow:auto; border-radius:22px; background:#f8fafc; color:#111827; padding:22px 22px 18px; box-shadow:0 24px 64px rgba(0,0,0,.35);
+}
+.modal h2 { margin:0 0 6px; font-size:28px; }
+.modal .meta { color:#475569; font-weight:600; margin-bottom:14px; }
+.modal .section-title { font-size:13px; font-weight:800; letter-spacing:.08em; color:#334155; text-transform:uppercase; margin:18px 0 6px; }
+.modal a { color:#0f4aa8; }
+.close-btn {
+  float:right; border:0; background:#111827; color:white; border-radius:999px; padding:8px 12px; cursor:pointer; font-weight:700;
+}
+@media (max-width: 1100px) {
+  .event.left,.event.right { width:calc(100% - 52px); left:26px; right:26px; }
+  .event .dot { left:-20px !important; right:auto !important; }
+  .footer-sources { columns:1; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Innovación en América del Norte: línea del tiempo comparativa</h1>
+  <div class="subtitle">15 hitos entre Canadá, Estados Unidos y México desde la segunda revolución industrial hasta la era post-COVID. La visualización enfatiza <strong>ritmos divergentes de desarrollo</strong>, <strong>conexiones transfronterizas</strong> y <strong>aprendizaje crítico</strong> sobre la evolución regional de la innovación.</div>
+  <div class="controls">
+    <span class="group-label">Filtrar por categoría</span>
+    <button class="filter active" data-group="category" data-value="all">Todas</button>
+    <button class="filter" data-group="category" data-value="Tecnológico-industrial">Tecnológico-industrial</button>
+    <button class="filter" data-group="category" data-value="Político-económico">Político-económico</button>
+    <button class="filter" data-group="category" data-value="Socio-cultural">Socio-cultural</button>
+    <span class="group-label" style="margin-left:18px;">Filtrar por país</span>
+    <button class="filter active" data-group="country" data-value="all">Todos</button>
+    <button class="filter" data-group="country" data-value="Canadá">Canadá</button>
+    <button class="filter" data-group="country" data-value="Estados Unidos">Estados Unidos</button>
+    <button class="filter" data-group="country" data-value="México">México</button>
+  </div>
+  <div class="legend">
+    <span><i class="swatch" style="background:#C0392B"></i> Canadá</span>
+    <span><i class="swatch" style="background:#1F4E79"></i> Estados Unidos</span>
+    <span><i class="swatch" style="background:#1E8449"></i> México</span>
+    <span><i class="swatch" style="background:#D4AC0D"></i> Tecnológico-industrial</span>
+    <span><i class="swatch" style="background:#7D3C98"></i> Político-económico</span>
+    <span><i class="swatch" style="background:#138D75"></i> Socio-cultural</span>
+    <span><i class="swatch" style="background:#F59E0B"></i> Hito principal (con conectividad ampliada)</span>
+  </div>
+</header>
+
+<div class="wrapper">
+  <div class="panel small-note">
+    <strong>Cómo leer la línea del tiempo:</strong> cada carril corresponde a un país. Los recuadros muestran fecha, hito e impacto breve . Haz clic en cualquier hito para abrir una ventana con contexto ampliado, vínculos transfronterizos y enlaces a artículos o videos. Las líneas punteadas señalan relaciones entre procesos de innovación.
+  </div>
+
+  <div class="timeline-shell">
+    <div id="timeline" class="timeline">
+      <div class="scale" id="scale"></div>
+      <svg class="connector-layer" id="connectorLayer"></svg>
+      <div class="lane" id="lane-ca"><div class="lane-header" style="background:var(--ca)">Canadá</div></div>
+      <div class="lane" id="lane-us"><div class="lane-header" style="background:var(--us)">Estados Unidos</div></div>
+      <div class="lane" id="lane-mx"><div class="lane-header" style="background:var(--mx)">México</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 style="margin-top:0">Fuentes consultadas (APA)</h2>
+    <ol class="footer-sources">
+      <li><span class='src-country'>Estados Unidos</span> — Guinness World Records. (s. f.). First industrial moving assembly line. https://www.guinnessworldrecords.com/world-records/first-industrial-moving-assembly-line</li>
+<li><span class='src-country'>Estados Unidos</span> — Computer History Museum. (s. f.). 1947: Invention of the point-contact transistor. https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/</li>
+<li><span class='src-country'>Estados Unidos</span> — DARPA. (2020). ARPANET. https://www.darpa.mil/news/features/arpanet</li>
+<li><span class='src-country'>Estados Unidos</span> — GPS.gov. (2009). U.S. statement from COPUOS S&amp;T Subcommittee. https://archive.gps.gov/news/2009/COPUOS/</li>
+<li><span class='src-country'>Estados Unidos</span> — United States Congress. (1996). Public Law 104-104—Telecommunications Act of 1996. https://www.congress.gov/104/plaws/publ104/PLAW-104publ104.pdf</li>
+<li><span class='src-country'>Canadá</span> — Parks Canada. (s. f.). Signal Hill National Historic Site. https://parcs.canada.ca/culture/designation/lieu-site/signal-hill</li>
+<li><span class='src-country'>Canadá</span> — Canadian Space Agency. (2025). History of the Canadian space program — 1962 to 1999. https://www.csa-asc.gc.ca/eng/about/virtual-tour/accessible/timeline-1962-1999.asp</li>
+<li><span class='src-country'>Canadá</span> — Telesat. (s. f.). Our history. https://www.telesat.com/history/</li>
+<li><span class='src-country'>Canadá</span> — Government of Canada. (2017). Growing Canada’s advantage in artificial intelligence. https://www.canada.ca/en/department-finance/news/2017/03/growing_canada_sadvantageinartificialintelligence.html</li>
+<li><span class='src-country'>Canadá</span> — Health Canada. (2022). Results at a glance: Evaluation of the National COVID-19 Exposure Notification App (COVID Alert). https://www.canada.ca/en/health-canada/corporate/transparency/corporate-management-reporting/evaluation/results-covid-alert-national-covid-19-exposure-notification-app.html</li>
+<li><span class='src-country'>México</span> — Consejo Nacional de la Industria Maquiladora y Manufacturera de Exportación. (s. f.). Historia de la manufactura en México. https://index.org.mx/historia/</li>
+<li><span class='src-country'>México</span> — World Trade Organization. (s. f.). Mexico and the WTO. https://www.wto.org/english/thewto_e/countries_e/mexico_e.htm</li>
+<li><span class='src-country'>México</span> — Wired. (1998, March 6). A rebel movement’s life on the Web. https://www.wired.com/1998/03/a-rebel-movements-life-on-the-web/</li>
+<li><span class='src-country'>México</span> — Banco de México. (s. f.). SPEI® transferencias. https://www.banxico.org.mx/servicios/spei_-transferencias-banco-me.html</li>
+<li><span class='src-country'>México</span> — Subsecretaría de Educación Básica. (2021). Comunicado SEP No. 172: Las experiencias de las comunidades educativas en el contexto de la pandemia por COVID-19 y la Estrategia Aprende en Casa de México. https://educacionbasica.sep.gob.mx/comunicado-sep-no-172/</li>
+    </ol>
+    <p class="small-note">Ordoñez Espinoza Mauricio</p>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalBox">
+    <button class="close-btn" id="closeModal">Cerrar</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+const events = [{"id": "ca_signalhill_1901", "date": "1901-12-12", "country": "Canadá", "category": "Tecnológico-industrial", "title": "Primer mensaje inalámbrico transatlántico en Signal Hill", "description": "La recepción del famoso mensaje inalámbrico en Signal Hill simbolizó el potencial de la comunicación sin cables. El hito conectó ciencia, imperio, navegación y telecomunicaciones en un momento decisivo para la modernidad norteatlántica.", "impact": "Ubicó a Canadá en el mapa de la innovación en telecomunicaciones y reforzó su papel estratégico en rutas oceánicas, comunicación marítima y desarrollo técnico temprano.", "connection": "El avance dialogó con experimentación industrial estadounidense y con una modernización telegráfica hemisférica que después alcanzaría también a México mediante redes regionales.", "source": "https://parks.canada.ca/culture/designation/lieu-site/signal-hill", "article": "https://www.thecanadianencyclopedia.ca/en/article/guglielmo-marconi", "video": "https://www.youtube.com/watch?v=64KyZK_4_xs", "icon": "📻", "principal": "No", "year_num": 1901.945205479452, "top": 168, "countryKey": "ca", "catKey": "tech"}, {"id": "us_assembly_1913", "date": "1913-10-07", "country": "Estados Unidos", "category": "Tecnológico-industrial", "title": "Línea de ensamblaje móvil de Ford", "description": "Ford introdujo la línea de ensamblaje móvil en Highland Park, acelerando la producción masiva y reduciendo costos. Se convirtió en el emblema del fordismo y redefinió la manufactura industrial del siglo XX en América del Norte.", "impact": "Impulsó la producción en serie, abarató bienes de consumo y consolidó a Estados Unidos como referencia continental en productividad industrial y organización del trabajo.", "connection": "Su lógica productiva influyó en la industrialización canadiense y, décadas más tarde, en la integración manufacturera de México a través de cadenas automotrices y de exportación.", "source": "https://www.guinnessworldrecords.com/world-records/first-industrial-moving-assembly-line", "article": "https://www.history.com/this-day-in-history/fords-assembly-line-starts-rolling", "video": "https://www.youtube.com/watch?v=S4KrIMZpwCY", "icon": "🏭", "principal": "No", "year_num": 1913.7643835616439, "top": 522, "countryKey": "us", "catKey": "tech"}, {"id": "us_transistor_1947", "date": "1947-12-23", "country": "Estados Unidos", "category": "Tecnológico-industrial", "title": "Invención del transistor en Bell Labs", "description": "El transistor de contacto puntual, demostrado en 1947, sustituyó a las válvulas de vacío y abrió la era de la electrónica moderna. Su impacto alcanzó computadoras, telecomunicaciones y posteriormente toda la economía digital.", "impact": "Sentó la base de la microelectrónica, la computación y las telecomunicaciones estadounidenses, fortaleciendo el liderazgo científico-industrial del país durante la posguerra.", "connection": "La revolución semiconductor impulsó industrias y redes de investigación en Canadá, y más adelante facilitó la expansión manufacturera electrónica y automotriz en México.", "source": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/", "article": "https://www.britannica.com/technology/transistor", "video": "https://www.youtube.com/watch?v=6yoJ6qFD_LA", "icon": "🔌", "principal": "No", "year_num": 1947.9753424657533, "top": 1549, "countryKey": "us", "catKey": "tech"}, {"id": "ca_alouette_1962", "date": "1962-09-29", "country": "Canadá", "category": "Tecnológico-industrial", "title": "Lanzamiento de Alouette 1", "description": "Con Alouette 1, Canadá se convirtió en el tercer país con satélite propio. El proyecto fortaleció la investigación ionosférica y mostró que un país medio podía desarrollar capacidades espaciales con relevancia científica global.", "impact": "Consolidó competencias aeroespaciales, investigación universitaria y prestigio tecnológico, además de abrir nuevas colaboraciones internacionales para la ciencia espacial canadiense.", "connection": "La cooperación espacial con Estados Unidos fue clave, mientras que el ejemplo canadiense mostraba a México nuevas posibilidades de inserción tecnológica en ámbitos satelitales y de telecomunicación.", "source": "https://www.csa-asc.gc.ca/eng/about/virtual-tour/accessible/timeline-1962-1999.asp", "article": "https://www.asc-csa.gc.ca/eng/satellites/alouette.asp", "video": "https://www.youtube.com/watch?v=YI9A_vF7jWQ", "icon": "🚀", "principal": "No", "year_num": 1962.7424657534248, "top": 1992, "countryKey": "ca", "catKey": "tech"}, {"id": "mx_bip_1965", "date": "1965-05-20", "country": "México", "category": "Político-económico", "title": "Programa de Industrialización Fronteriza", "description": "El Programa de Industrialización Fronteriza impulsó maquiladoras orientadas a la exportación en la frontera norte. Marcó un giro en la integración productiva con Estados Unidos y sentó bases para la manufactura regional posterior.", "impact": "Atrajo inversión, empleo industrial y transferencia organizativa hacia zonas fronterizas, aunque también abrió debates sobre dependencia, salarios y asimetrías regionales.", "connection": "Aprovechó la cercanía con el mercado estadounidense y, comparativamente, contrastó con la evolución manufacturera canadiense, prefigurando cadenas regionales de valor en Norteamérica.", "source": "https://index.org.mx/historia/", "article": "https://www.britannica.com/place/Mexico/Trade", "video": "https://www.youtube.com/watch?v=KpM3fsl9x3I", "icon": "🏗️", "principal": "No", "year_num": 1965.3808219178081, "top": 2071, "countryKey": "mx", "catKey": "pol"}, {"id": "us_arpanet_1969", "date": "1969-10-29", "country": "Estados Unidos", "category": "Tecnológico-industrial", "title": "Primer mensaje de ARPANET", "description": "El primer mensaje enviado por ARPANET en 1969 inauguró una nueva infraestructura de comunicación digital. Aunque militar-académica en su origen, su evolución transformó internet en la base de la conectividad global contemporánea.", "impact": "Conectó universidades, laboratorios y agencias de investigación, incubando el ecosistema que más tarde impulsaría software, plataformas, innovación y comunicación digital masiva.", "connection": "Su legado tecnológico se extendió hacia universidades y redes en Canadá y México, posibilitando cooperación científica, activismo transfronterizo y economías digitales integradas.", "source": "https://www.darpa.mil/news/features/arpanet", "article": "https://www.universityofcalifornia.edu/news/lo-and-behold-internet", "video": "https://www.youtube.com/watch?v=RXJKdh1KZ0w", "icon": "🌐", "principal": "No", "year_num": 1969.8246575342466, "top": 2204, "countryKey": "us", "catKey": "tech"}, {"id": "ca_anik_1972", "date": "1972-11-09", "country": "Canadá", "category": "Tecnológico-industrial", "title": "Anik A1, satélite comercial doméstico", "description": "Anik A1 fue uno de los primeros satélites domésticos comerciales del mundo. Permitió comunicaciones y televisión a larga distancia en un territorio inmenso, integrando comunidades remotas y consolidando la infraestructura satelital canadiense.", "impact": "Mejoró la conectividad nacional, especialmente en el norte y zonas aisladas, y reforzó la autonomía tecnológica y comunicacional de Canadá.", "connection": "Complementó ecosistemas satelitales y audiovisuales de Estados Unidos y ofreció un antecedente útil para la futura expansión de telecomunicaciones y educación a distancia en México.", "source": "https://www.telesat.com/history/", "article": "https://www.britannica.com/technology/communications-satellite", "video": "https://www.youtube.com/watch?v=YI9A_vF7jWQ", "icon": "📺", "principal": "Sí", "year_num": 1972.8551912568305, "top": 2295, "countryKey": "ca", "catKey": "tech"}, {"id": "us_gps_1978", "date": "1978-02-22", "country": "Estados Unidos", "category": "Tecnológico-industrial", "title": "Primer satélite del sistema GPS", "description": "El lanzamiento del primer satélite NAVSTAR en 1978 convirtió la navegación por satélite en una realidad estratégica. Lo que nació como herramienta militar terminó siendo infraestructura crítica para transporte, agricultura, logística y teléfonos inteligentes.", "impact": "Fortaleció la capacidad militar y científica estadounidense y luego se convirtió en una ventaja civil de alcance mundial, esencial para la economía digital y la movilidad.", "connection": "Canadá integró GPS en aviación, recursos y monitoreo territorial; México lo incorporó en transporte, seguridad y servicios digitales, mostrando una infraestructura compartida a escala norteamericana.", "source": "https://archive.gps.gov/news/2009/COPUOS/", "article": "https://www.gps.gov/", "video": "https://www.gps.gov/time-and-navigation-smithsonian", "icon": "🛰️", "principal": "Sí", "year_num": 1978.1424657534246, "top": 2454, "countryKey": "us", "catKey": "tech"}, {"id": "mx_gatt_1986", "date": "1986-08-24", "country": "México", "category": "Político-económico", "title": "Ingreso de México al GATT", "description": "La entrada de México al GATT simbolizó la apertura comercial del país tras la crisis de deuda. Este giro reorientó la política económica y preparó el terreno para una integración más profunda con Norteamérica.", "impact": "Aceleró la liberalización comercial, redefinió estrategias industriales y vinculó al país a reglas multilaterales que condicionaron la modernización económica posterior.", "connection": "Acercó a México a los marcos comerciales ya dominantes en Estados Unidos y Canadá, anticipando futuros acuerdos y tensiones sobre competitividad regional.", "source": "https://www.wto.org/english/thewto_e/countries_e/mexico_e.htm", "article": "https://www.gob.mx/se/acciones-y-programas/mexico-y-la-omc", "video": "https://www.youtube.com/watch?v=7l7B2Yp3sMc", "icon": "📦", "principal": "No", "year_num": 1986.6438356164383, "top": 2709, "countryKey": "mx", "catKey": "pol"}, {"id": "mx_zapatista_1994", "date": "1994-01-01", "country": "México", "category": "Socio-cultural", "title": "Zapatismo y activismo en red", "description": "El levantamiento zapatista coincidió con la entrada del TLCAN y se volvió un hito de apropiación social de internet. Redes de solidaridad difundieron comunicados y transformaron la comunicación política transnacional desde México.", "impact": "Reconfiguró el debate público sobre democracia, indígenas y globalización, y mostró el poder de las tecnologías digitales para visibilizar demandas desde la periferia.", "connection": "Activistas, académicos y medios en Estados Unidos y Canadá amplificaron el movimiento, creando una esfera transfronteriza temprana de ciberactivismo norteamericano.", "source": "https://www.wired.com/1998/03/a-rebel-movements-life-on-the-web/", "article": "https://www.jstor.org/stable/10.1525/j.ctt1ppg4h", "video": "https://www.youtube.com/watch?v=T1q1J9b4m5E", "icon": "✊", "principal": "Sí", "year_num": 1994.0, "top": 2930, "countryKey": "mx", "catKey": "soc"}, {"id": "us_telecom_1996", "date": "1996-02-08", "country": "Estados Unidos", "category": "Político-económico", "title": "Telecommunications Act of 1996", "description": "La Telecommunications Act reorganizó el marco regulatorio de radio, telefonía y cable en Estados Unidos. Promovió competencia y convergencia mediática, acelerando la expansión de internet comercial y de nuevos gigantes de telecomunicaciones.", "impact": "Redefinió el mercado de telecomunicaciones, favoreció inversión en infraestructura digital y marcó la transición hacia un ecosistema mediático y tecnológico más concentrado y expansivo.", "connection": "Sus cambios regulatorios influyeron en marcos de competencia y telecomunicaciones en Canadá y México, en un entorno regional cada vez más interconectado por redes y plataformas.", "source": "https://www.congress.gov/104/plaws/publ104/PLAW-104publ104.pdf", "article": "https://www.congress.gov/bill/104th-congress/senate-bill/652/actions", "video": "https://www.youtube.com/watch?v=4sHKj1D4c2A", "icon": "📡", "principal": "No", "year_num": 1996.103825136612, "top": 2993, "countryKey": "us", "catKey": "pol"}, {"id": "mx_spei_2004", "date": "2004-08-13", "country": "México", "category": "Tecnológico-industrial", "title": "Inicio del SPEI", "description": "El SPEI modernizó las transferencias electrónicas en tiempo real en México. Su desarrollo por el banco central convirtió la infraestructura de pagos en una palanca clave para banca digital, fintech y comercio electrónico.", "impact": "Redujo tiempos y costos de pago, fortaleció la confianza en transferencias electrónicas y habilitó un ecosistema de innovación financiera con cobertura nacional creciente.", "connection": "Se inserta en la evolución de pagos digitales de Estados Unidos y Canadá, pero con una trayectoria propia basada en infraestructura pública centralizada y adopción masiva reciente.", "source": "https://www.banxico.org.mx/servicios/spei_-transferencias-banco-me.html", "article": "https://www.banxico.org.mx/payment-systems/chronology-of-payment-systems.html", "video": "https://www.youtube.com/watch?v=9zx6vG2_l8c", "icon": "💸", "principal": "Sí", "year_num": 2004.6147540983607, "top": 3248, "countryKey": "mx", "catKey": "tech"}, {"id": "ca_ai_2017", "date": "2017-03-22", "country": "Canadá", "category": "Político-económico", "title": "Pan-Canadian Artificial Intelligence Strategy", "description": "En 2017 Canadá lanzó la primera estrategia nacional de inteligencia artificial. La política articuló investigación, talento y ecosistemas regionales, posicionando al país como referente en gobernanza temprana e inversión pública en IA.", "impact": "Fortaleció polos como Toronto-Waterloo, Montréal y Edmonton; atrajo investigadores, inversión y visibilidad internacional en IA aplicada y responsable.", "connection": "Estados Unidos siguió siendo socio y competidor por talento e inversión; México observó un modelo de política pública útil para construir capacidades regionales emergentes.", "source": "https://www.budget.canada.ca/2017/docs/plan/chap-01-en.html", "article": "https://www.canada.ca/en/department-finance/news/2017/03/growing_canada_sadvantageinartificialintelligence.html", "video": "https://www.youtube.com/watch?v=F1v2AChQvdM", "icon": "🤖", "principal": "Sí", "year_num": 2017.2191780821918, "top": 3626, "countryKey": "ca", "catKey": "pol"}, {"id": "mx_aprende_2020", "date": "2020-03-23", "country": "México", "category": "Socio-cultural", "title": "Aprende en Casa", "description": "La estrategia Aprende en Casa trasladó la educación básica a televisión, radio y plataformas digitales durante la pandemia. Fue una adopción masiva de tecnología educativa bajo emergencia y evidenció brechas de acceso persistentes.", "impact": "Mantuvo continuidad educativa para millones de estudiantes y mostró tanto la capacidad de coordinación estatal como las desigualdades tecnológicas del país.", "connection": "Comparte la lógica de digitalización de emergencia observada en Canadá y Estados Unidos, pero con un uso más intenso de televisión abierta por las diferencias de conectividad.", "source": "https://educacionbasica.sep.gob.mx/comunicado-sep-no-172/", "article": "https://aprendeencasa.sep.gob.mx/", "video": "https://www.youtube.com/@aprendeencasa", "icon": "🧑‍🏫", "principal": "No", "year_num": 2020.224043715847, "top": 3716, "countryKey": "mx", "catKey": "soc"}, {"id": "ca_covidalert_2020", "date": "2020-07-31", "country": "Canadá", "category": "Socio-cultural", "title": "Lanzamiento de la app COVID Alert", "description": "COVID Alert representó la apropiación social de tecnologías móviles para salud pública durante la pandemia. El caso mostró oportunidades y límites del rastreo digital voluntario en contextos democráticos y altamente conectados.", "impact": "Impulsó el debate nacional sobre privacidad, confianza pública y digitalización de la salud, además de ensayar nuevas herramientas de respuesta sanitaria basada en datos.", "connection": "Dialogó con aplicaciones y debates similares en Estados Unidos y con la educación y digitalización de emergencia en México durante la era post-COVID.", "source": "https://www.canada.ca/en/health-canada/corporate/transparency/corporate-management-reporting/evaluation/results-covid-alert-national-covid-19-exposure-notification-app.html", "article": "https://www.pm.gc.ca/en/news/news-releases/2020/07/31/new-mobile-app-help-notify-canadians-potential-covid-19-exposure-now", "video": "https://www.canada.ca/en/public-health/services/diseases/coronavirus-disease-covid-19/covid-alert.html", "icon": "📱", "principal": "No", "year_num": 2020.5792349726776, "top": 3727, "countryKey": "ca", "catKey": "soc"}];
+const analytical = {"us_gps_1978": "El GPS surgió en el contexto de la Guerra Fría, cuando Estados Unidos buscaba navegación y localización más precisas para fines militares. El lanzamiento del primer satélite NAVSTAR en 1978 volvió tangible una infraestructura estratégica que, con el tiempo, rebasó el ámbito castrense. En su país de origen fortaleció capacidades de defensa, investigación y después una enorme economía civil basada en mapas, logística y teléfonos inteligentes. Su trayectoria se conectó con Canadá, que incorporó el sistema en aviación, recursos naturales y monitoreo territorial, y con México, donde el GPS se volvió crucial para transporte, seguridad, agricultura de precisión y plataformas digitales de uso cotidiano.", "ca_anik_1972": "Anik A1 apareció en una etapa en que Canadá necesitaba resolver un problema estructural: comunicar un territorio vasto y disperso. Como uno de los primeros satélites domésticos comerciales del mundo, permitió ampliar telefonía, televisión y servicios hacia comunidades remotas. En Canadá fortaleció cohesión territorial y autonomía tecnológica en comunicaciones. Su desarrollo dialogó estrechamente con circuitos empresariales y satelitales de Estados Unidos, mientras que para México funcionó como antecedente relevante de cómo la infraestructura espacial podía apoyar educación, medios y conectividad a gran escala. El hito muestra ritmos divergentes de adopción, pero también aprendizajes compartidos en telecomunicación regional.", "ca_ai_2017": "La estrategia canadiense de inteligencia artificial de 2017 marcó un hito porque convirtió ventajas científicas acumuladas en una política nacional explícita. En su contexto, el país buscó retener talento, financiar investigación y articular ecosistemas regionales de innovación en un campo emergente. Su impacto interno fue notable en Montréal, Toronto-Waterloo y Edmonton, donde la IA ganó visibilidad económica y regulatoria. La conexión con Estados Unidos fue inmediata por la competencia y cooperación en inversión, empresas y movilidad de especialistas; con México abrió un contraste útil, pues mostró cómo una estrategia pública temprana puede orientar capacidades tecnológicas y cooperación regional en América del Norte.", "mx_zapatista_1994": "El zapatismo de 1994 no fue solo un movimiento político: también evidenció una apropiación temprana de internet y redes digitales para la circulación internacional de mensajes, denuncias y solidaridades. En México alteró la conversación pública sobre democracia, pueblos indígenas y globalización en el mismo momento en que iniciaba el TLCAN. Su impacto radicó en combinar comunicación política local con una audiencia global. La conexión con Estados Unidos y Canadá fue explícita, porque activistas, periodistas, académicos y organizaciones de ambos países reprodujeron y tradujeron comunicados, creando una esfera transfronteriza pionera de ciberactivismo norteamericano.", "mx_spei_2004": "El SPEI nació como parte de la modernización del sistema de pagos mexicano y del fortalecimiento de la infraestructura financiera del banco central. En su contexto, respondía a la necesidad de transferencias más rápidas, seguras y eficientes. Su impacto en México ha sido profundo: facilitó banca digital, comercio electrónico, fintech y hábitos cotidianos de pago en tiempo real. La comparación con Estados Unidos y Canadá resulta reveladora: mientras esos países siguieron trayectorias más fragmentadas o con mayor peso del sector privado, México consolidó una infraestructura pública de pagos que hoy dialoga con las transformaciones digitales del conjunto de América del Norte."};
+const connections = [{"from": "us_assembly_1913", "to": "mx_bip_1965", "label": "manufactura regional"}, {"from": "us_arpanet_1969", "to": "mx_zapatista_1994", "label": "redes digitales"}, {"from": "us_arpanet_1969", "to": "ca_covidalert_2020", "label": "internet aplicada"}, {"from": "ca_anik_1972", "to": "mx_aprende_2020", "label": "telecom y educación"}, {"from": "us_gps_1978", "to": "mx_spei_2004", "label": "infraestructura digital"}, {"from": "ca_ai_2017", "to": "mx_spei_2004", "label": "datos e innovación"}];
+const timeline = document.getElementById('timeline');
+const scale = document.getElementById('scale');
+const connectorLayer = document.getElementById('connectorLayer');
+const laneMap = {
+  "ca": document.getElementById('lane-ca'),
+  "us": document.getElementById('lane-us'),
+  "mx": document.getElementById('lane-mx')
+};
+const filters = { category:'all', country:'all' };
+
+for (let y = 1901; y <= 2020; y += 5) {
+  const tick = document.createElement('div');
+  tick.className = 'tick';
+  tick.style.top = (140 + (y - 1901) * 30 - 8) + 'px';
+  tick.textContent = y;
+  scale.appendChild(tick);
+}
+
+function createEventCard(ev, idx) {
+  const lane = laneMap[ev.countryKey];
+  const card = document.createElement('div');
+  const side = idx % 2 === 0 ? 'left' : 'right';
+  card.className = `event ${side} country-${ev.countryKey}`;
+  card.dataset.id = ev.id;
+  card.dataset.country = ev.country;
+  card.dataset.category = ev.category;
+  card.style.top = ev.top + 'px';
+  card.innerHTML = `
+    <div class="dot"></div>
+    <div class="eyebrow">${ev.date} · ${ev.country}</div>
+    <h3>${ev.icon} ${ev.title}</h3>
+    <p>${ev.description}</p>
+    <div class="chips">
+      <span class="chip cat-${ev.catKey}">${ev.category}</span>
+      ${ev.principal === 'Sí' ? '<span class="chip principal">Conectividad ampliada</span>' : ''}
+    </div>
+  `;
+  card.addEventListener('click', () => openModal(ev));
+  lane.appendChild(card);
+}
+
+function openModal(ev) {
+  const modal = document.getElementById('modalContent');
+  const paragraph = analytical[ev.id] || '';
+  modal.innerHTML = `
+    <h2>${ev.icon} ${ev.title}</h2>
+    <div class="meta">${ev.date} · ${ev.country} · ${ev.category}</div>
+    <div class="section-title">Descripción breve</div>
+    <p>${ev.description}</p>
+    <div class="section-title">Impacto en el país de origen</div>
+    <p>${ev.impact}</p>
+    <div class="section-title">Conexión con los otros dos países</div>
+    <p>${ev.connection}</p>
+    ${paragraph ? `<div class="section-title">Párrafo analítico (hito principal)</div><p>${paragraph}</p>` : ''}
+    <div class="section-title">Enlaces</div>
+    <p><a href="${ev.source}" target="_blank" rel="noopener">Fuente principal</a><br/>
+    <a href="${ev.article}" target="_blank" rel="noopener">Artículo complementario</a><br/>
+    <a href="${ev.video}" target="_blank" rel="noopener">Video / recurso adicional</a></p>
+  `;
+  document.getElementById('modalBackdrop').style.display = 'flex';
+}
+
+document.getElementById('closeModal').onclick = () => document.getElementById('modalBackdrop').style.display = 'none';
+document.getElementById('modalBackdrop').onclick = (e) => {
+  if (e.target.id === 'modalBackdrop') document.getElementById('modalBackdrop').style.display = 'none';
+};
+
+function getCenterPoint(el) {
+  const parent = timeline.getBoundingClientRect();
+  const rect = el.getBoundingClientRect();
+  return {
+    x: rect.left - parent.left + rect.width/2,
+    y: rect.top - parent.top + 22
+  };
+}
+
+function drawConnections() {
+  const bounds = timeline.getBoundingClientRect();
+  connectorLayer.setAttribute('width', bounds.width);
+  connectorLayer.setAttribute('height', bounds.height);
+  connectorLayer.innerHTML = '';
+  connections.forEach(conn => {
+    const a = document.querySelector(`.event[data-id="${conn.from}"]`);
+    const b = document.querySelector(`.event[data-id="${conn.to}"]`);
+    if (!a || !b || a.classList.contains('hidden') || b.classList.contains('hidden')) return;
+    const p1 = getCenterPoint(a), p2 = getCenterPoint(b);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+    line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+    connectorLayer.appendChild(line);
+    const tx = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    tx.setAttribute('x', (p1.x+p2.x)/2 + 4);
+    tx.setAttribute('y', (p1.y+p2.y)/2 - 4);
+    tx.textContent = conn.label;
+    connectorLayer.appendChild(tx);
+  });
+}
+
+function applyFilters() {
+  document.querySelectorAll('.event').forEach(card => {
+    const matchCat = filters.category === 'all' || card.dataset.category === filters.category;
+    const matchCountry = filters.country === 'all' || card.dataset.country === filters.country;
+    card.classList.toggle('hidden', !(matchCat && matchCountry));
+  });
+  drawConnections();
+}
+
+document.querySelectorAll('button.filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const group = btn.dataset.group, value = btn.dataset.value;
+    filters[group] = value;
+    document.querySelectorAll(`button.filter[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  });
+});
+
+const countryCount = {};
+events.forEach(ev => {
+  countryCount[ev.countryKey] = (countryCount[ev.countryKey] || 0) + 1;
+  createEventCard(ev, countryCount[ev.countryKey]);
+});
+window.addEventListener('load', drawConnections);
+window.addEventListener('resize', drawConnections);
+</script>
+</body>
+</html>
